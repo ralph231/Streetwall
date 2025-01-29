@@ -45,7 +45,7 @@
                        name="email" 
                        required 
                        pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-                       placeholder=" ">
+                       placeholder="">
                 <label for="email">Email Address</label>
                 <div class="error-message">Please provide a valid email address.</div>
             </div>
@@ -55,22 +55,21 @@
                        id="postId" 
                        name="postId" 
                        required 
-                       pattern="[0-9]+"
-                       placeholder=" ">
+                       placeholder="">
                 <label for="postId">Post ID</label>
-                <div class="error-message">Please provide a valid Post ID (numbers only).</div>
+                <div class="error-message">Please provide a valid Post ID.</div>
             </div>
 
             <div class="form-group">
                 <textarea id="reason" 
                           name="reason" 
                           required 
-                          maxlength="500"
+                          maxlength="1000"
                           placeholder=" "></textarea>
                 <label for="reason">Reason for Appeal</label>
                 <div class="error-message">Please provide a reason for your appeal.</div>
                 <div class="char-counter">
-                    <span id="charCount">500</span> characters remaining
+                    <span id="charCount">1000</span> characters remaining
                 </div>
             </div>
 

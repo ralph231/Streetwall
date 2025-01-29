@@ -206,59 +206,61 @@ app.post('/', upload.array('files', 10), async (req, res) => {
 
     // Process each uploaded file
     for (const file of files) {
-      try {
-        const ext = path.extname(file.originalname).toLowerCase();
-        const isImage = ['.jpg', '.jpeg', '.png', '.gif', '.heic'].includes(ext);
+      const ext = path.extname(file.originalname).toLowerCase();
+      const isImage = ['.jpg', '.jpeg', '.png', '.gif', '.heic', 'webp', 'svg+xml'].includes(ext);
 
-        if (isImage) {
-          // Process image with sharp
-          const processedFilename = 'processed_' + file.filename;
-          const processedPath = path.join('public/uploads', processedFilename);
-          
-          await sharp(file.path)
-            .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
-            .jpeg({ quality: 80 })
-            .toFile(processedPath);
+      if (isImage) {
+        // Process image with sharp
+        const processedFilename = 'processed_' + file.filename;
+        const processedPath = path.join('public/uploads', processedFilename);
+        
+        await sharp(file.path)
+          .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
+          .jpeg({ quality: 80 })
+          .toFile(processedPath);
 
-          mediaFiles.push({
-            originalName: file.originalname,
-            filename: processedFilename,
-            type: 'image'
-          });
-        } else {
-          mediaFiles.push({
-            originalName: file.originalname,
-            filename: file.filename,
-            type: 'file'
-          });
-        }
-      } catch (fileError) {
-        console.error('Error processing file:', fileError);
-        // Continue with other files even if one fails
-        continue;
+        // Delete original file
+        await fs.unlink(file.path);
+
+        mediaFiles.push({
+          filename: processedFilename,
+          type: 'image',
+          originalName: file.originalname
+        });
+      } else {
+        mediaFiles.push({
+          filename: file.filename,
+          type: 'video',
+          originalName: file.originalname
+        });
       }
     }
 
-    // Create post with processed files
-    const post = new Post({
-      message: message,
-      media: mediaFiles,
-      timestamp: new Date()
-    });
+    // Create new post if there's content or media
+    if (message?.trim() || mediaFiles.length > 0) {
+      const newPost = new Post({
+        content: message,
+        media: mediaFiles,
+        timestamp: new Date()
+      });
 
-    await post.save();
-    
-    // Emit the new post to all connected clients
-    io.emit('newPost', post);
-    
-    res.json({ success: true, post });
+      await newPost.save();
+
+      // Emit new post to all connected clients
+      io.emit('newMessage', {
+        _id: newPost._id.toString(),
+        content: newPost.content || '',
+        media: newPost.media || [],
+        timestamp: newPost.timestamp
+      });
+
+      res.redirect('/');
+    } else {
+      res.redirect('/');
+    }
   } catch (error) {
-    console.error('Error creating post:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error creating post', 
-      error: error.message 
-    });
+    console.error('Error processing upload:', error);
+    res.status(500).json({ error: 'Error processing upload: ' + error.message });
   }
 });
 

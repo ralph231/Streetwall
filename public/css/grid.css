@@ -139,7 +139,7 @@
 .card-text {
     font-size: 0.9375rem;
     line-height: 1.5;
-    color: #2c3338;
+    color: #000;
     margin: 0;
     white-space: pre-line;
     word-break: break-word;
@@ -147,7 +147,7 @@
 
 .timestamp {
     margin-top: 0.75rem;
-    color: #646970;
+    color: #000;
     font-size: 0.8125rem;
     display: flex;
     justify-content: space-between;
@@ -248,7 +248,7 @@
 
 .card-content p {
     margin: 0;
-    color: #666;
+    color: #000;
     font-size: 14px;
 }
 

@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Character counter
     reasonTextarea.addEventListener('input', () => {
-        const remaining = 500 - reasonTextarea.value.length;
+        const remaining = 1000 - reasonTextarea.value.length;
         charCount.textContent = remaining;
         
         if (remaining < 50) {
@@ -30,9 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (input.id === 'email') {
             const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             isValid = emailPattern.test(input.value);
-        } else if (input.id === 'postId') {
-            const postIdPattern = /^[0-9]+$/;
-            isValid = postIdPattern.test(input.value);
         }
         
         if (isValid) {
