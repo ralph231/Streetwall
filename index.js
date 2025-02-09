@@ -8,7 +8,6 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const bcrypt = require('bcrypt');
-
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
@@ -207,7 +206,7 @@ app.post('/', upload.array('files', 10), async (req, res) => {
     // Process each uploaded file
     for (const file of files) {
       const ext = path.extname(file.originalname).toLowerCase();
-      const isImage = ['.jpg', '.jpeg', '.png', '.gif', '.heic', 'webp', 'svg+xml'].includes(ext);
+      const isImage = ['.jpg', '.jpeg', '.png', '.gif', '.heic'].includes(ext);
 
       if (isImage) {
         // Process image with sharp

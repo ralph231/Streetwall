@@ -33,7 +33,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M3 12h18M3 12L9 6M3 12l6 6"/>
                     </svg>
-                    Back to Feed
+                    Back
                 </a>
             </nav>
         </header>
@@ -45,7 +45,7 @@
                        name="email" 
                        required 
                        pattern="[^@\s]+@[^@\s]+\.[^@\s]+"
-                       placeholder="">
+                       placeholder=" ">
                 <label for="email">Email Address</label>
                 <div class="error-message">Please provide a valid email address.</div>
             </div>
@@ -55,21 +55,22 @@
                        id="postId" 
                        name="postId" 
                        required 
-                       placeholder="">
+                       pattern="[0-9]+"
+                       placeholder=" ">
                 <label for="postId">Post ID</label>
-                <div class="error-message">Please provide a valid Post ID.</div>
+                <div class="error-message">Please provide a valid Post ID (numbers only).</div>
             </div>
 
             <div class="form-group">
                 <textarea id="reason" 
                           name="reason" 
                           required 
-                          maxlength="1000"
+                          maxlength="500"
                           placeholder=" "></textarea>
                 <label for="reason">Reason for Appeal</label>
                 <div class="error-message">Please provide a reason for your appeal.</div>
                 <div class="char-counter">
-                    <span id="charCount">1000</span> characters remaining
+                    <span id="charCount">500</span> characters remaining
                 </div>
             </div>
 
@@ -94,6 +95,8 @@
                 </button>
             </div>
         </form>
+
+        <p>If you want to follow up your delete-appeal, You can email us at <a href="mailto:streetwall011@gmail.com">streetwall011@gmail.com</a>. Also if you email us, please include your Post ID.</p>
     </div>
 
     <script src="/js/delete-appeal.js"></script>
