@@ -263,6 +263,7 @@ app.post('/', upload.array('files', 10), async (req, res) => {
   }
 });
 
+// Admin routes
 app.get('/admin/login', (req, res) => {
   res.render('admin-login', { error: null });
 });
@@ -366,32 +367,70 @@ app.delete('/admin/delete-post/:id', isAdmin, async (req, res) => {
   }
 });
 
+// Handle appeal route
 app.post('/admin/handle-appeal/:id', isAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, response } = req.body;
+    const { status, postId } = req.body;
     
-    const appeal = await Appeal.findOneAndUpdate(
-      { id },
-      { 
-        status,
-        adminResponse: response,
-        $set: { 'timestamp.responded': new Date() }
-      },
-      { new: true }
-    );
-
-    if (status === 'approved') {
-      await Post.findOneAndUpdate(
-        { id: appeal.postId },
-        { isDeleted: false }
-      );
+    // Find and update the appeal
+    const appeal = await Appeal.findById(id);
+    
+    if (!appeal) {
+      return res.status(404).json({ success: false, message: 'Appeal not found' });
     }
 
-    res.json({ success: true });
+    // Update appeal status
+    appeal.status = status;
+    appeal.processedAt = new Date();
+    appeal.processed = true;
+    
+    // If approved, delete the associated post
+    if (status === 'approved') {
+      const post = await Post.findById(postId);
+      if (post) {
+        post.isDeleted = true;
+        await post.save();
+        
+        // Emit post deleted event
+        io.emit('postDeleted', postId);
+      }
+    }
+
+    await appeal.save();
+
+    // Emit appeal updated event
+    io.emit('appealUpdated', {
+      appealId: id,
+      status,
+      postId: status === 'approved' ? postId : null
+    });
+
+    res.json({ 
+      success: true, 
+      message: `Appeal ${status}`,
+      appeal: appeal
+    });
+
   } catch (error) {
     console.error('Error handling appeal:', error);
-    res.status(500).json({ success: false });
+    res.status(500).json({ success: false, message: 'Error handling appeal' });
+  }
+});
+
+// Clear all appeals route
+app.post('/admin/clear-appeals', isAdmin, async (req, res) => {
+  try {
+    // Delete all appeals from the database
+    await Appeal.deleteMany({});
+    
+    // Emit event for real-time updates
+    io.emit('appealsCleared');
+    
+    res.json({ success: true, message: 'All appeals cleared successfully' });
+  } catch (error) {
+    console.error('Error clearing appeals:', error);
+    res.status(500).json({ success: false, message: 'Failed to clear appeals' });
   }
 });
 
