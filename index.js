@@ -18,6 +18,7 @@ const config = require('./config.json');
 const Post = require('./models/Post');
 const Appeal = require('./models/Appeal');
 const Admin = require('./models/Admin');
+const Stalk = require('./models/Stalk');
 
 // Connect to MongoDB
 mongoose.connect(config.mongodb.uri, config.mongodb.options)
@@ -148,6 +149,19 @@ io.on('connection', (socket) => {
       console.error('Error getting stats:', error);
     }
   });
+
+  socket.on('viewPost', async (postId) => {
+    try {
+      const stalk = await Stalk.findOneAndUpdate(
+        { postId: postId },
+        { $inc: { viewCount: 1 }, lastViewed: new Date() },
+        { upsert: true, new: true }
+      );
+      io.emit('updateViews', stalk.viewCount);
+    } catch (error) {
+      console.error('Error updating view count:', error);
+    }
+  });
 });
 
 // Routes
@@ -171,6 +185,28 @@ app.get('/delete-appeal', (req, res) => {
 
 app.get('/about', (req, res) => {
   res.render('about');
+});
+
+// View individual post route
+app.get('/post/:id', async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    if (!post || post.isDeleted) {
+      return res.status(404).redirect('/');
+    }
+
+    // Get or create view count
+    let stalk = await Stalk.findOne({ postId: post._id });
+    if (!stalk) {
+      stalk = new Stalk({ postId: post._id });
+      await stalk.save();
+    }
+
+    res.render('stalk', { post, views: stalk.viewCount });
+  } catch (error) {
+    console.error('Error viewing post:', error);
+    res.status(500).redirect('/');
+  }
 });
 
 app.post('/submit-appeal', async (req, res) => {
